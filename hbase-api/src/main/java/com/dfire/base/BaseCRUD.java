@@ -3,11 +3,10 @@ package com.dfire.base;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.*;
 import org.apache.hadoop.hbase.client.*;
-import org.apache.hadoop.hbase.protobuf.generated.HBaseProtos;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -55,35 +54,31 @@ public class BaseCRUD {
     // 创建一张表
     public static void create(String namespace,String tableName,String[] families)
             throws IOException {
-        List<HBaseProtos.SnapshotDescription> list = admin.listSnapshots(namespace);
-        if(list == null || list.size() == 0){
+        NamespaceDescriptor[] namespaceDescriptors =  admin.listNamespaceDescriptors();
+        List<String> names = new ArrayList<String>(namespaceDescriptors.length);
+        for(NamespaceDescriptor namespaceDescriptor : namespaceDescriptors){
+            names.add(namespaceDescriptor.getName());
+        }
+
+        if(!names.contains(namespace)){
             NamespaceDescriptor  descriptor =  NamespaceDescriptor.create(namespace).build();
             admin.createNamespace(descriptor);
         }else {
             System.out.println("namespace "+namespace+" is exist");
         }
-        create(namespace+":"+tableName,families);
+        create(namespace + ":" + tableName, families);
     }
 
 
 
 
     // 添加一条记录
-    public static void putMany(String tableName, String[] rows,String[] families,
-                           String[] columns, String[] dataList) throws IOException {
+    public static void putList(String tableName,List<Put> puts) throws IOException {
         TableName tableNameObj = TableName.valueOf(tableName);
         Table table = connection.getTable(tableNameObj);
-
-        for(int i =0;i<rows.length;i++){
-            String row = rows[i];
-            String columnFamily = families[i];
-            String column = columns[i];
-            String data = dataList[i];
-            Put p1 = new Put(Bytes.toBytes(row));
-            p1.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(data));
-            table.put(p1);
-            System.out.println("put'" + row + "'," + columnFamily + ":" + column + "','" + data + "'");
-        }
+        table.put(puts);
+        table.close();
+        close();
     }
 
     /**
@@ -106,6 +101,8 @@ public class BaseCRUD {
         Put p1 = new Put(Bytes.toBytes(row));
         p1.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(data));
         table.put(p1);
+        table.close();
+        close();
         System.out.println("put'" + row + "'," + columnFamily + ":" + column + "','" + data + "'");
     }
 
@@ -130,6 +127,8 @@ public class BaseCRUD {
         Get p1 = new Get(Bytes.toBytes(row));
         p1.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column));
         showCell(table.get(p1));
+        table.close();
+        close();
     }
 
 
@@ -145,6 +144,8 @@ public class BaseCRUD {
 
         Result result = table.get(p1);
         showCell(result);
+        table.close();
+        close();
     }
 
 
@@ -157,6 +158,19 @@ public class BaseCRUD {
             System.out.println("row Name:"+new String(CellUtil.cloneQualifier(cell)));
             System.out.println("value:"+new String(CellUtil.cloneValue(cell)));
         }
+    }
+
+    //关闭连接
+    public static  void close(){
+//        try {
+//            if(null != admin)
+//                admin.close();
+//            if(null != connection)
+//                connection.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
     }
 
 }
