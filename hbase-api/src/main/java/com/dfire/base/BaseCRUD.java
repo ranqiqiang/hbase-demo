@@ -7,7 +7,9 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by qqr on 16/8/2.
@@ -16,6 +18,8 @@ public class BaseCRUD {
 
     private static Connection connection;
     private static Admin admin ;
+
+    public static Map<String,Table> hTableMap = new HashMap<String,Table>();
 
     static {
         Configuration config = BaseConfig.getConfiguration();
@@ -46,6 +50,20 @@ public class BaseCRUD {
         }
         admin.createTable(td);
         admin.close();
+    }
+
+    public static void put(String tableName,Put put) throws IOException {
+        Table table = hTableMap.get(tableName);
+        if(table == null){
+            TableName tableNameObj = TableName.valueOf(tableName);
+            table = connection.getTable(tableNameObj);
+            if (!admin.tableExists(tableNameObj)){
+                throw new NullPointerException("table "+tableName +" not found");
+            }
+            hTableMap.put(tableName,table);
+        }
+        table.put(put);
+        table.close();
     }
 
 

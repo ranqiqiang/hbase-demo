@@ -27,9 +27,18 @@ public class UserDemo {
 
 //        createTable();
 
-        BaseCRUD.putList(namespace + ":" + tableName, getPutList(tableName));
+//        BaseCRUD.putList(namespace + ":" + tableName, getPutList(tableName));
 
-        showResult();
+        List<Put> putList = getPutList(tableName);
+        int i = 0;
+        for(Put put : putList){
+            while (true){
+                BaseCRUD.put(namespace + ":" + tableName,put);
+                System.out.println(i++);
+            }
+        }
+
+//        showResult();
 
 
     }
