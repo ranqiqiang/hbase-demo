@@ -1,4 +1,4 @@
-# hbase-demo
+# hbase-demo 简单连接测试
 
 # hbase version 1.0
 
