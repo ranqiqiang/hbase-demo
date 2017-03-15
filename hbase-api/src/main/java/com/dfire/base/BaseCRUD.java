@@ -19,8 +19,8 @@ public class BaseCRUD {
     private static Connection connection;
     private static Admin admin ;
 
+    // 初始化 和缓存
     public static Map<String,Table> hTableMap = new HashMap<String,Table>();
-
     static {
         Configuration config = BaseConfig.getConfiguration();
         try {
