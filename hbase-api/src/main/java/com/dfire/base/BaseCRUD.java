@@ -26,6 +26,9 @@ public class BaseCRUD {
         try {
             connection = ConnectionFactory.createConnection(config);
             admin = connection.getAdmin();
+            if(connection != null && !connection.isClosed()){
+                System.out.println("初始化连接成功！");
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
